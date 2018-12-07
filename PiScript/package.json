@@ -1,0 +1,17 @@
+{
+  "name": "oil-tank-vision",
+  "version": "1.0.0",
+  "description": "an example script for capturing a webcam photo and uploading it to Azure Blob Storage",
+  "main": "uploadBlob.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Suz Hinton",
+  "license": "MIT",
+  "dependencies": {
+    "azure-storage": "^2.10.2",
+    "dotenv": "^6.2.0",
+    "node-webcam": "^0.4.6"
+  }
+}

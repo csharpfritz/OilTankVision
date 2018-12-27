@@ -8,4 +8,4 @@ An IoT and Azure project that uses a Raspberry Pi to convert an analog oil-tank 
 1.  The numbers detected in the photo and their location identified by Cognitive Services are used to determine a 'true reading'
 1.  The true reading is saved in Azure Table storage for use in reporting or other applications
 
-This project was assembled on-stage at [DevIntersection 2018 in Las Vegas](https://devinteresection.com) and a recording of the presentation is available on Twitch at:  https://www.twitch.tv/videos/345556722
+This project was assembled on-stage at [DevIntersection 2018 in Las Vegas](https://devinteresection.com) and a recording of the presentation is available on YouTube at:  https://www.youtube.com/watch?v=gzPyMkiYdu4

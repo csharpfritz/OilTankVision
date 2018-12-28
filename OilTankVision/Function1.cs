@@ -12,11 +12,11 @@ using Newtonsoft.Json;
 
 namespace OilTankVision
 {
-	public static class Function1
+	public static partial class Function1
 	{
 
-		[return: Table("OilTankReadings")]
-		[FunctionName("ProcessNewGaugePhoto")]
+		[return: Table("OilTankReadings", Connection = "OilTankStorage")]
+		[FunctionName("ProcessNewGaugePhoto")][StorageAccount("OilTankStorage")]
 		public static OilTankReading Run([BlobTrigger("gauges/{name}", Connection = "")]Stream myBlob, string name, TraceWriter log)
 		{
 
@@ -27,6 +27,18 @@ namespace OilTankVision
 			log.Info($"Processing photo snapped on: {pictureDate}");
 
 			var result = SendToRecognizeTextApi(name).GetAwaiter().GetResult();
+			var outValue = CalculateAbsoluteValue(log, pictureDate, result, int.Parse(ConfigurationManager.AppSettings["Gauge_Top"]), int.Parse(ConfigurationManager.AppSettings["Gauge_Height"]), int.Parse(ConfigurationManager.AppSettings["Gauge_DigitHeight"]));
+
+			log.Info($"Results from analysis: {result.status}");
+
+			log.Info($"C# Blob trigger function Processed blob\n Name:{name} \n Size: {myBlob.Length} Bytes");
+
+			return outValue;
+
+		}
+
+		public static OilTankReading CalculateAbsoluteValue(TraceWriter log, DateTime pictureDate, TextResult.Rootobject result, int topOfGauge, int heightOfGauge, int heightDigit)
+		{
 			var outValue = new OilTankReading
 			{
 				ReadingDateTime = pictureDate
@@ -35,21 +47,21 @@ namespace OilTankVision
 			foreach (var line in result.recognitionResult.lines.Where(l => l.words.Any(w => w.Confidence != "Low")))
 			{
 
-				if (int.TryParse(line.text, out int gaugeValue)) {
+				if (int.TryParse(line.text, out int gaugeValue))
+				{
 
 					log.Info($"Found gauge value: {gaugeValue}");
+
+					// Identify position
+					var topOfDigit = line.boundingBox[1];
+
 					outValue.Value = gaugeValue;
 				}
 
 
 			}
 
-			log.Info($"Results from analysis: {result.status}");
-
-			log.Info($"C# Blob trigger function Processed blob\n Name:{name} \n Size: {myBlob.Length} Bytes");
-
 			return outValue;
-
 		}
 
 		private static async Task<TextResult.Rootobject> SendToRecognizeTextApi(string name)
@@ -85,12 +97,6 @@ namespace OilTankVision
 			}
 
 
-
-		}
-		private class CognitiveServicesPayload
-		{
-
-			public string url;
 
 		}
 

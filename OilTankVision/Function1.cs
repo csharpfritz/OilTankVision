@@ -17,8 +17,9 @@ namespace OilTankVision
 	{
 
 		[return: Table("OilTankReadings", Connection = "OilTankStorage")]
-		[FunctionName("ProcessNewGaugePhoto")][StorageAccount("OilTankStorage")]
-		public static OilTankReading Run([BlobTrigger("gauges/{name}", Connection = "")]Stream myBlob, string name, TraceWriter log)
+		[FunctionName("ProcessNewGaugePhoto")]
+		[StorageAccount("OilTankStorage")]
+		public static OilTankReading Run([BlobTrigger("gauges/{name}", Connection = "OilTankStorage")]Stream myBlob, string name, TraceWriter log)
 		{
 
 			// Full location at:  https://jeffcatimages.blob.core.windows.net/gauges/{name}

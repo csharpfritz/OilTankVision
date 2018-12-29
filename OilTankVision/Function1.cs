@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace OilTankVision
 {
@@ -26,14 +27,35 @@ namespace OilTankVision
 
 			log.Info($"Processing photo snapped on: {pictureDate}");
 
-			var result = SendToRecognizeTextApi(name).GetAwaiter().GetResult();
+			var resultTask = SendToRecognizeTextApi(name);
+			var weatherTask = GetWeatherTempInFahrenheit(ConfigurationManager.AppSettings["Weather_Key"], ConfigurationManager.AppSettings["Weather_PostalCode"]);
+			Task.WaitAll(new Task[] { resultTask, weatherTask });
+
+			var result = resultTask.Result;
+
 			var outValue = CalculateAbsoluteValue(log, pictureDate, result, int.Parse(ConfigurationManager.AppSettings["Gauge_Top"]), int.Parse(ConfigurationManager.AppSettings["Gauge_Height"]), int.Parse(ConfigurationManager.AppSettings["Gauge_DigitHeight"]));
+			outValue.TempF = weatherTask.Result;
 
 			log.Info($"Results from analysis: {result.status}");
 
 			log.Info($"C# Blob trigger function Processed blob\n Name:{name} \n Size: {myBlob.Length} Bytes");
 
 			return outValue;
+
+		}
+
+		private static async Task<int> GetWeatherTempInFahrenheit(string apiKey, string postalCode)
+		{
+
+			using (var client = new HttpClient()) {
+
+				var outString = await client.GetStringAsync($"https://api.weatherbit.io/v2.0/current?postal_code={postalCode}&key={apiKey}");
+				var o = JObject.Parse(outString);
+
+				var tempC = o["data"]["temp"].ToObject<decimal>();
+				return (int)Math.Ceiling((tempC * 9) / 5 + 32);
+
+			}
 
 		}
 
@@ -72,6 +94,8 @@ namespace OilTankVision
 		private static async Task<TextResult.Rootobject> SendToRecognizeTextApi(string name)
 		{
 
+			var retries = 0;
+
 			using (var client = new HttpClient())
 			{
 
@@ -89,15 +113,29 @@ namespace OilTankVision
 
 					var outLocation = response.Headers.GetValues("Operation-Location").First();
 
-					// Wait 5 seconds for the processing
-					await Task.Delay(5000);
-
-					var result = await client.GetStringAsync(outLocation);
+					var result = await GetResultsAsync(outLocation);
 					return JsonConvert.DeserializeObject<TextResult.Rootobject>(result);
 
 				}
 
 				return null;
+
+				async Task<string> GetResultsAsync(string location) {
+
+					var result = await client.GetAsync(location);
+					if (result.StatusCode == HttpStatusCode.OK) {
+						return await result.Content.ReadAsStringAsync();
+					} else if (retries < 10) {
+
+						retries++;
+						await Task.Delay(500);
+						return await GetResultsAsync(location);
+
+					}
+
+					return "";
+
+				}
 
 			}
 

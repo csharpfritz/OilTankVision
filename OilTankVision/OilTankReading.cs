@@ -18,5 +18,7 @@ namespace OilTankVision
 
 		public double Value { get; set; }
 
+		public int TempF { get; set; }
+
 	}
 }

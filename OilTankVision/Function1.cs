@@ -27,11 +27,15 @@ namespace OilTankVision
 
 			log.Info($"Processing photo snapped on: {pictureDate}");
 
+			var postalCode = ConfigurationManager.AppSettings["Weather_PostalCode"];
+			var apiKey = ConfigurationManager.AppSettings["Weather_Key"];
+
 			var resultTask = SendToRecognizeTextApi(name);
-			var weatherTask = GetWeatherTempInFahrenheit(ConfigurationManager.AppSettings["Weather_Key"], ConfigurationManager.AppSettings["Weather_PostalCode"]);
+			var weatherTask = GetWeatherTempInFahrenheit(apiKey, postalCode);
 			Task.WaitAll(new Task[] { resultTask, weatherTask });
 
 			var result = resultTask.Result;
+			log.Info($"Reporting with weather in {postalCode}: {weatherTask.Result}F");
 
 			var outValue = CalculateAbsoluteValue(log, pictureDate, result, int.Parse(ConfigurationManager.AppSettings["Gauge_Top"]), int.Parse(ConfigurationManager.AppSettings["Gauge_Height"]), int.Parse(ConfigurationManager.AppSettings["Gauge_DigitHeight"]));
 			outValue.TempF = weatherTask.Result;
@@ -52,7 +56,7 @@ namespace OilTankVision
 				var outString = await client.GetStringAsync($"https://api.weatherbit.io/v2.0/current?postal_code={postalCode}&key={apiKey}");
 				var o = JObject.Parse(outString);
 
-				var tempC = o["data"]["temp"].ToObject<decimal>();
+				var tempC = o["data"][0]["temp"].ToObject<decimal>();
 				return (int)Math.Ceiling((tempC * 9) / 5 + 32);
 
 			}
@@ -124,8 +128,16 @@ namespace OilTankVision
 
 					var result = await client.GetAsync(location);
 					if (result.StatusCode == HttpStatusCode.OK) {
-						return await result.Content.ReadAsStringAsync();
-					} else if (retries < 10) {
+						var stringResult = await result.Content.ReadAsStringAsync();
+						if (JObject.Parse(stringResult)["status"].Value<string>() != "Succeeded") {
+							retries++;
+							await Task.Delay(500);
+							return await GetResultsAsync(location);
+						}
+
+						return stringResult;
+
+					} else if (retries < 20) {
 
 						retries++;
 						await Task.Delay(500);

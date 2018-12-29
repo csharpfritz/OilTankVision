@@ -6,10 +6,18 @@ namespace Test.CalculateAbsoluteValue
 {
 	public abstract class BaseGaugeFixture {
 
-		protected TraceWriter _TraceWriter = new Mock<TraceWriter>(null).Object;
+		protected readonly TraceWriter _TraceWriter;
 		protected readonly string TextDetected = "150";
 		protected readonly DateTime PictureDate = new DateTime(2018, 12, 28, 19, 21, 0);
 
+		protected BaseGaugeFixture() {
+
+			var newMock = new Mock<TraceWriter>(null);
+			//newMock.Setup(w => w.Info(It.IsAny<string>(), null))
+			//.Callback<string, string>((x, y) => Console.WriteLine(x));
+			_TraceWriter = newMock.Object;
+
+		}
 
 		protected static OilTankVision.TextResult.Rootobject CreateTextResult(int[] boundingBox, string textDetected)
 		{

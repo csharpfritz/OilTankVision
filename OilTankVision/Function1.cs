@@ -47,15 +47,20 @@ namespace OilTankVision
 			foreach (var line in result.recognitionResult.lines.Where(l => l.words.Any(w => w.Confidence != "Low")))
 			{
 
-				if (int.TryParse(line.text, out int gaugeValue))
+				if (double.TryParse(line.text, out double gaugeValue))
 				{
-
-					log.Info($"Found gauge value: {gaugeValue}");
 
 					// Identify position
 					var topOfDigit = line.boundingBox[1];
+					var relativeTopOfDigit = topOfDigit - topOfGauge;
+					var relativeBottom = heightOfGauge - heightDigit;
+					var pctLocation = relativeTopOfDigit / (double)relativeBottom;
+					var modifier = (0.5 - pctLocation) * 10;
 
-					outValue.Value = gaugeValue;
+					log.Info($"Found gauge value: {gaugeValue} at position {pctLocation:0%}");
+
+					outValue.Value = gaugeValue + modifier;
+
 				}
 
 

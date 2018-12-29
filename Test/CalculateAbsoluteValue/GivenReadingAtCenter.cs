@@ -11,7 +11,7 @@ namespace Test.CalculateAbsoluteValue
 	public class GivenReadingAtCenter : BaseGaugeFixture
 	{
 
-		private readonly int[] BoundingBox = new int[] { 534, 272, 612, 269, 617, 322, 532, 323 };
+		private readonly int[] BoundingBox = new int[] { 534, 268, 612, 269, 617, 322, 532, 323 };
 
 		[Fact]
 		public void ShouldReturnExactValue() {

@@ -159,6 +159,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CalculateAbsoluteValue\BaseGaugeFixture.cs" />
+    <Compile Include="CalculateAbsoluteValue\GivenReadingAtBottom.cs" />
     <Compile Include="CalculateAbsoluteValue\GivenReadingAtCenter.cs" />
     <Compile Include="CalculateAbsoluteValue\GivenReadingAtTop.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

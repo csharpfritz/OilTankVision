@@ -19,20 +19,20 @@ namespace Test.CalculateAbsoluteValue
 
 		}
 
-		protected static OilTankVision.TextResult.Rootobject CreateTextResult(int[] boundingBox, string textDetected)
+		protected static OilTankVision.AzureRecognizeText.Rootobject CreateTextResult(int[] boundingBox, string textDetected)
 		{
 
-			return new OilTankVision.TextResult.Rootobject
+			return new OilTankVision.AzureRecognizeText.Rootobject
 			{
 				status = "Succeeded",
-				recognitionResult = new OilTankVision.TextResult.Recognitionresult
+				recognitionResult = new OilTankVision.AzureRecognizeText.Recognitionresult
 				{
-					lines = new OilTankVision.TextResult.Line[] {
-						new OilTankVision.TextResult.Line {
+					lines = new OilTankVision.AzureRecognizeText.Line[] {
+						new OilTankVision.AzureRecognizeText.Line {
 							boundingBox = boundingBox,
 							text = textDetected,
-							words = new OilTankVision.TextResult.Word[] {
-								new OilTankVision.TextResult.Word {
+							words = new OilTankVision.AzureRecognizeText.Word[] {
+								new OilTankVision.AzureRecognizeText.Word {
 								boundingBox = boundingBox,
 								text = textDetected
 								}

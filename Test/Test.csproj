@@ -163,8 +163,12 @@
     <Compile Include="CalculateAbsoluteValue\GivenReadingAtCenter.cs" />
     <Compile Include="CalculateAbsoluteValue\GivenReadingAtTop.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VerticalNumberedFloatGaugeFixture.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="ExampleData.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

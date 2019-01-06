@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OilTankVision.AzureRecognizeText;
+using System;
 
 namespace OilTankVision
 {
@@ -21,4 +22,7 @@ namespace OilTankVision
 		public int TempF { get; set; }
 
 	}
+
+
+
 }

@@ -22,6 +22,10 @@ namespace OilTankVision
 		public static OilTankReading Run([BlobTrigger("gauges/{name}", Connection = "OilTankStorage")]Stream myBlob, string name, TraceWriter log)
 		{
 
+			//IGaugeReader gaugeReader = Activator.CreateInstance("" "VerticalNumberedFloatGauge");
+
+            IGaugeReader gaugeReader = new VerticalNumberedFloatGuage();
+            
 			// Full location at:  https://jeffcatimages.blob.core.windows.net/gauges/{name}
 
 			var pictureDate = DateTime.ParseExact(name.Substring(0, name.Length - 4), "yyyyMMddHHmm", null);
@@ -38,7 +42,7 @@ namespace OilTankVision
 			var result = resultTask.Result;
 			log.Info($"Reporting with weather in {postalCode}: {weatherTask.Result}F");
 
-			var outValue = CalculateAbsoluteValue(log, pictureDate, result, int.Parse(ConfigurationManager.AppSettings["Gauge_Top"]), int.Parse(ConfigurationManager.AppSettings["Gauge_Height"]), int.Parse(ConfigurationManager.AppSettings["Gauge_DigitHeight"]));
+			var outValue = gaugeReader.ProcessTextResult(log, new OilTankReading { ReadingDateTime = pictureDate }, result);
 			outValue.TempF = weatherTask.Result;
 
 			log.Info($"Results from analysis: {result.status}");
@@ -64,7 +68,7 @@ namespace OilTankVision
 
 		}
 
-		public static OilTankReading CalculateAbsoluteValue(TraceWriter log, DateTime pictureDate, TextResult.Rootobject result, int topOfGauge, int heightOfGauge, int heightDigit)
+		public static OilTankReading CalculateAbsoluteValue(TraceWriter log, DateTime pictureDate, AzureRecognizeText.Rootobject result, int topOfGauge, int heightOfGauge, int heightDigit)
 		{
 			var outValue = new OilTankReading
 			{
@@ -96,7 +100,7 @@ namespace OilTankVision
 			return outValue;
 		}
 
-		private static async Task<TextResult.Rootobject> SendToRecognizeTextApi(string name)
+		private static async Task<AzureRecognizeText.Rootobject> SendToRecognizeTextApi(string name)
 		{
 
 			var retries = 0;
@@ -105,7 +109,8 @@ namespace OilTankVision
 			{
 
 				var serviceAddress = "https://eastus2.api.cognitive.microsoft.com/vision/v2.0/recognizeText?mode=Printed";
-				var fullImageLocation = $"https://jeffcatimages.blob.core.windows.net/gauges/{name}";
+				var fullImageLocation = string.Format(ConfigurationManager.AppSettings["BlobLocation"], name);
+				//$"https://jeffcatimages.blob.core.windows.net/gauges/{0}";
 
 				client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", ConfigurationManager.AppSettings["OilTankVisionKey"]);
 
@@ -119,7 +124,7 @@ namespace OilTankVision
 					var outLocation = response.Headers.GetValues("Operation-Location").First();
 
 					var result = await GetResultsAsync(outLocation);
-					return JsonConvert.DeserializeObject<TextResult.Rootobject>(result);
+					return JsonConvert.DeserializeObject<AzureRecognizeText.Rootobject>(result);
 
 				}
 

@@ -1,7 +1,7 @@
 ﻿using OilTankVision.AzureRecognizeText;
 using System;
 
-namespace OilTankVision
+namespace OilTankVision.Data
 {
 	public class OilTankReading {
 

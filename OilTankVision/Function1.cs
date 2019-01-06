@@ -10,6 +10,9 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using OilTankVision.Data;
+using OilTankVision.Gauges;
+using OilTankVision.Weather;
 
 namespace OilTankVision
 {
@@ -19,14 +22,12 @@ namespace OilTankVision
 		[return: Table("OilTankReadings", Connection = "OilTankStorage")]
 		[FunctionName("ProcessNewGaugePhoto")]
 		[StorageAccount("OilTankStorage")]
-		public static OilTankReading Run([BlobTrigger("gauges/{name}", Connection = "OilTankStorage")]Stream myBlob, string name, TraceWriter log)
+		public static OilTankReading Run([BlobTrigger("gauges/{name}", Connection = "OilTankStorage")]Stream myBlob,
+			string name, TraceWriter log)
 		{
 
-			//IGaugeReader gaugeReader = Activator.CreateInstance("" "VerticalNumberedFloatGauge");
-
-            IGaugeReader gaugeReader = new VerticalNumberedFloatGuage();
-            
-			// Full location at:  https://jeffcatimages.blob.core.windows.net/gauges/{name}
+			IGaugeReader gaugeReader = new VerticalNumberedFloatGuage();
+			IWeatherProvider weatherProvider = new WeatherBitProvider();
 
 			var pictureDate = DateTime.ParseExact(name.Substring(0, name.Length - 4), "yyyyMMddHHmm", null);
 
@@ -36,7 +37,7 @@ namespace OilTankVision
 			var apiKey = ConfigurationManager.AppSettings["Weather_Key"];
 
 			var resultTask = SendToRecognizeTextApi(name);
-			var weatherTask = GetWeatherTempInFahrenheit(apiKey, postalCode);
+			var weatherTask = weatherProvider.GetWeatherTempInFahrenheit(apiKey, postalCode);
 			Task.WaitAll(new Task[] { resultTask, weatherTask });
 
 			var result = resultTask.Result;
@@ -53,53 +54,6 @@ namespace OilTankVision
 
 		}
 
-		private static async Task<int> GetWeatherTempInFahrenheit(string apiKey, string postalCode)
-		{
-
-			using (var client = new HttpClient()) {
-
-				var outString = await client.GetStringAsync($"https://api.weatherbit.io/v2.0/current?postal_code={postalCode}&key={apiKey}");
-				var o = JObject.Parse(outString);
-
-				var tempC = o["data"][0]["temp"].ToObject<decimal>();
-				return (int)Math.Ceiling((tempC * 9) / 5 + 32);
-
-			}
-
-		}
-
-		public static OilTankReading CalculateAbsoluteValue(TraceWriter log, DateTime pictureDate, AzureRecognizeText.Rootobject result, int topOfGauge, int heightOfGauge, int heightDigit)
-		{
-			var outValue = new OilTankReading
-			{
-				ReadingDateTime = pictureDate
-			};
-
-			foreach (var line in result.recognitionResult.lines.Where(l => l.words.Any(w => w.Confidence != "Low")))
-			{
-
-				if (double.TryParse(line.text, out double gaugeValue))
-				{
-
-					// Identify position
-					var topOfDigit = line.boundingBox[1];
-					var relativeTopOfDigit = topOfDigit - topOfGauge;
-					var relativeBottom = heightOfGauge - heightDigit;
-					var pctLocation = relativeTopOfDigit / (double)relativeBottom;
-					var modifier = (0.5 - pctLocation) * 10;
-
-					log.Info($"Found gauge value: {gaugeValue} at position {pctLocation:0%}");
-
-					outValue.Value = gaugeValue + modifier;
-
-				}
-
-
-			}
-
-			return outValue;
-		}
-
 		private static async Task<AzureRecognizeText.Rootobject> SendToRecognizeTextApi(string name)
 		{
 
@@ -110,11 +64,10 @@ namespace OilTankVision
 
 				var serviceAddress = "https://eastus2.api.cognitive.microsoft.com/vision/v2.0/recognizeText?mode=Printed";
 				var fullImageLocation = string.Format(ConfigurationManager.AppSettings["BlobLocation"], name);
-				//$"https://jeffcatimages.blob.core.windows.net/gauges/{0}";
 
 				client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", ConfigurationManager.AppSettings["OilTankVisionKey"]);
 
-				var response = await client.PostAsJsonAsync(serviceAddress, new CognitiveServicesPayload {url=fullImageLocation});
+				var response = await client.PostAsJsonAsync(serviceAddress, new CognitiveServicesPayload { url = fullImageLocation });
 
 				response.EnsureSuccessStatusCode();
 
@@ -130,12 +83,15 @@ namespace OilTankVision
 
 				return null;
 
-				async Task<string> GetResultsAsync(string location) {
+				async Task<string> GetResultsAsync(string location)
+				{
 
 					var result = await client.GetAsync(location);
-					if (result.StatusCode == HttpStatusCode.OK) {
+					if (result.StatusCode == HttpStatusCode.OK)
+					{
 						var stringResult = await result.Content.ReadAsStringAsync();
-						if (JObject.Parse(stringResult)["status"].Value<string>() != "Succeeded") {
+						if (JObject.Parse(stringResult)["status"].Value<string>() != "Succeeded")
+						{
 							retries++;
 							await Task.Delay(500);
 							return await GetResultsAsync(location);
@@ -143,7 +99,9 @@ namespace OilTankVision
 
 						return stringResult;
 
-					} else if (retries < 20) {
+					}
+					else if (retries < 20)
+					{
 
 						retries++;
 						await Task.Delay(500);
@@ -157,7 +115,12 @@ namespace OilTankVision
 
 			}
 
+		}
 
+		private class CognitiveServicesPayload
+		{
+
+			public string url;
 
 		}
 

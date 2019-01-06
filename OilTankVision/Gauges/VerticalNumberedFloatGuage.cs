@@ -1,9 +1,10 @@
 ﻿using Microsoft.Azure.WebJobs.Host;
 using OilTankVision.AzureRecognizeText;
+using OilTankVision.Data;
 using System;
 using System.Linq;
 
-namespace OilTankVision
+namespace OilTankVision.Gauges
 {
 	public class VerticalNumberedFloatGuage : IGaugeReader
 	{

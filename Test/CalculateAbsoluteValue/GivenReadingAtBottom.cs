@@ -1,4 +1,5 @@
 ﻿using OilTankVision;
+using OilTankVision.Gauges;
 using Xunit;
 
 namespace Test.CalculateAbsoluteValue
@@ -6,13 +7,13 @@ namespace Test.CalculateAbsoluteValue
 	public class GivenReadingAtBottom : BaseGaugeFixture
 	{
 
-		private readonly int[] BoundingBox = new int[] { 534, 293, 612, 269, 617, 322, 532, 323 };
+		private readonly int[] BoundingBox = new int[] { 534, 293, 612, 269, 617, 343, 532, 323 };
 
 		[Fact]
 		public void ShouldReturnFiveBeforeValue()
 		{
 
-			var outValue = Function1.CalculateAbsoluteValue(_TraceWriter, PictureDate, CreateTextResult(BoundingBox, TextDetected), 243, 100, 50);
+			var outValue = new VerticalNumberedFloatGuage().ProcessTextResult(_TraceWriter, new OilTankVision.Data.OilTankReading(), CreateTextResult(BoundingBox, TextDetected));
 
 			Assert.Equal(145D, outValue.Value);
 

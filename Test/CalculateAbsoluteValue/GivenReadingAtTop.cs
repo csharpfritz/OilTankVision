@@ -1,4 +1,5 @@
 ﻿using OilTankVision;
+using OilTankVision.Gauges;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace Test.CalculateAbsoluteValue
 		public void ShouldReturnFiveAfterValue()
 		{
 
-			var outValue = Function1.CalculateAbsoluteValue(_TraceWriter, PictureDate, CreateTextResult(BoundingBox, TextDetected), 243, 100, 50);
+			var outValue = new VerticalNumberedFloatGuage().ProcessTextResult(_TraceWriter, new OilTankVision.Data.OilTankReading(), CreateTextResult(BoundingBox, TextDetected));
 
 			Assert.Equal(155D, outValue.Value);
 

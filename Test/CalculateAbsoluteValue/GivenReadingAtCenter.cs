@@ -1,4 +1,5 @@
 ﻿using OilTankVision;
+using OilTankVision.Gauges;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,12 +12,12 @@ namespace Test.CalculateAbsoluteValue
 	public class GivenReadingAtCenter : BaseGaugeFixture
 	{
 
-		private readonly int[] BoundingBox = new int[] { 534, 268, 612, 269, 617, 322, 532, 323 };
+		private readonly int[] BoundingBox = new int[] { 534, 268, 612, 269, 617, 318, 532, 323 };
 
 		[Fact]
 		public void ShouldReturnExactValue() {
 
-			var outValue = Function1.CalculateAbsoluteValue(_TraceWriter, PictureDate, CreateTextResult(BoundingBox, TextDetected), 243, 100, 50);
+			var outValue = new VerticalNumberedFloatGuage().ProcessTextResult(_TraceWriter, new OilTankVision.Data.OilTankReading(), CreateTextResult(BoundingBox, TextDetected));
 
 			Assert.Equal(150D, outValue.Value);
 

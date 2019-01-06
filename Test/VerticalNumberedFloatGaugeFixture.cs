@@ -2,6 +2,8 @@
 using Newtonsoft.Json.Linq;
 using OilTankVision;
 using OilTankVision.AzureRecognizeText;
+using OilTankVision.Data;
+using OilTankVision.Gauges;
 using System;
 using System.Collections.Generic;
 using System.IO;

@@ -26,13 +26,31 @@ namespace Test
 			// Arrange
 			var azureReadings = JsonConvert.DeserializeObject<Rootobject>(File.ReadAllText(@"ExampleData.json"));
 
-			var analyzer = new VerticalNumberedFloatGuage();
+			var analyzer = new VerticalNumberedFloatGauge();
 
 			// Act
 			var sut = analyzer.ProcessTextResult(_TraceWriter, new OilTankReading(), azureReadings);
 
 			// Assert
 			Assert.Equal(150, sut.Value);
+
+		}
+
+		[Fact]
+		public void ShouldReturn118ish()
+		{
+
+			// Arrange
+			var azureReadings = JsonConvert.DeserializeObject<Rootobject>(File.ReadAllText(@"ExampleData2.json"));
+
+			var analyzer = new VerticalNumberedFloatGauge();
+
+			// Act
+			var sut = analyzer.ProcessTextResult(_TraceWriter, new OilTankReading(), azureReadings);
+
+			// Assert
+			Assert.True(sut.Value > 118);
+			Assert.True(sut.Value < 119);
 
 		}
 

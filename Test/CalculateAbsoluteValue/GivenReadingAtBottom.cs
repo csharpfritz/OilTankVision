@@ -13,7 +13,7 @@ namespace Test.CalculateAbsoluteValue
 		public void ShouldReturnFiveBeforeValue()
 		{
 
-			var outValue = new VerticalNumberedFloatGuage().ProcessTextResult(_TraceWriter, new OilTankVision.Data.OilTankReading(), CreateTextResult(BoundingBox, TextDetected));
+			var outValue = new VerticalNumberedFloatGauge().ProcessTextResult(_TraceWriter, new OilTankVision.Data.OilTankReading(), CreateTextResult(BoundingBox, TextDetected));
 
 			Assert.Equal(145D, outValue.Value);
 

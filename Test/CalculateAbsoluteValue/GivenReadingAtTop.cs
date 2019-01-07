@@ -18,7 +18,7 @@ namespace Test.CalculateAbsoluteValue
 		public void ShouldReturnFiveAfterValue()
 		{
 
-			var outValue = new VerticalNumberedFloatGuage().ProcessTextResult(_TraceWriter, new OilTankVision.Data.OilTankReading(), CreateTextResult(BoundingBox, TextDetected));
+			var outValue = new VerticalNumberedFloatGauge().ProcessTextResult(_TraceWriter, new OilTankVision.Data.OilTankReading(), CreateTextResult(BoundingBox, TextDetected));
 
 			Assert.Equal(155D, outValue.Value);
 

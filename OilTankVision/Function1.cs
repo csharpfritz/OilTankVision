@@ -26,7 +26,7 @@ namespace OilTankVision
 			string name, TraceWriter log)
 		{
 
-			IGaugeReader gaugeReader = new VerticalNumberedFloatGuage();
+			IGaugeReader gaugeReader = new VerticalNumberedFloatGauge();
 			IWeatherProvider weatherProvider = new WeatherBitProvider();
 
 			var pictureDate = DateTime.ParseExact(name.Substring(0, name.Length - 4), "yyyyMMddHHmm", null);

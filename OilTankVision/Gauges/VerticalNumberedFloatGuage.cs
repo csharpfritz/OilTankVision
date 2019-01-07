@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace OilTankVision.Gauges
 {
-	public class VerticalNumberedFloatGuage : IGaugeReader
+	public class VerticalNumberedFloatGauge : IGaugeReader
 	{
 		private TraceWriter _log;
 		private Rootobject _rawData;
@@ -22,10 +22,11 @@ namespace OilTankVision.Gauges
 			};
 
 			var line = _rawData.recognitionResult.lines.FirstOrDefault(l => l.text == "SCULLY" && l.words.Any(w => w.Confidence != "Low")); 
+			line = line ?? _rawData.recognitionResult.lines.FirstOrDefault(l => l.text == "SCULLY");
 			if (line != null)
 			{
-				var (topOfGauge, heightOfGauge) = CalculateHeightOfGaugeWindow(line);
-				outValue.Value = IdentifyValue(topOfGauge, heightOfGauge);
+				var topOfGauge = CalculateGaugeWindowTop(line);
+				outValue.Value = IdentifyValue(topOfGauge);
 				return outValue;
 			}
 
@@ -34,10 +35,10 @@ namespace OilTankVision.Gauges
 
 		}
 
-		private (int topOfGauge, int heightOfGauge) CalculateHeightOfGaugeWindow(Line referenceLine)
+		private int CalculateGaugeWindowTop(Line referenceLine)
 		{
 
-			(int topOfGauge, int heightOfGauge) outValues = (0, 0);
+			int outValues = 0;
 
 			int refHeightOfScully = 28;
 			int refDistanceToWindow = 66;
@@ -46,15 +47,14 @@ namespace OilTankVision.Gauges
 			int topOfScully = referenceLine.boundingBox[1];
 			int bottomOfScully = referenceLine.boundingBox[5];
 			int heightOfScully = bottomOfScully - topOfScully;
-			double relativePct = refHeightOfScully / (double)heightOfScully;
+			double relativePct = heightOfScully / (double)refHeightOfScully;
 
-			outValues.heightOfGauge = (int)(relativePct * refHeightGauge);
-			outValues.topOfGauge = (int)(relativePct * refDistanceToWindow) + bottomOfScully;
+			outValues = (int)(relativePct * refDistanceToWindow) + bottomOfScully;
 
 			return outValues;
 		}
 
-		private double IdentifyValue(int topOfGauge, int heightOfGauge)
+		private double IdentifyValue(int topOfGauge)
 		{
 
 			var outValue = 0.0D;
@@ -68,9 +68,10 @@ namespace OilTankVision.Gauges
 					var topOfDigit = line.boundingBox[1]; 
 					var bottomOfDigit = line.boundingBox[5];
 					var heightDigit = bottomOfDigit - topOfDigit;
+					var heightOfGauge = heightDigit * 2;		// Window is twice as large as the digit
 					var relativeTopOfDigit = topOfDigit - topOfGauge;
 					var relativeBottom = heightOfGauge - heightDigit;
-					var pctLocation = relativeTopOfDigit / (double)relativeBottom;
+					var pctLocation = relativeTopOfDigit / (double)relativeBottom; 
 					var modifier = (0.5 - pctLocation) * 10;
 
 					_log.Info($"Found gauge value: {gaugeValue} at position {pctLocation:0%}");

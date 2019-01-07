@@ -1,0 +1,39 @@
+{
+	"status": "Succeeded",
+	"recognitionResult": {
+		"lines": [
+			{
+				"boundingBox": [ 510, 138, 630, 135, 631, 171, 512, 175 ],
+				"text": "SCULLY",
+				"words": [
+					{
+						"boundingBox": [ 510, 139, 631, 137, 631, 172, 510, 176 ],
+						"text": "SCULLY",
+						"Confidence": "Low"
+					}
+				]
+			},
+			{
+				"boundingBox": [ 526, 239, 616, 242, 617, 277, 526, 280 ],
+				"text": "TTO",
+				"words": [
+					{
+						"boundingBox": [ 531, 238, 610, 239, 610, 280, 531, 279 ],
+						"text": "TTO",
+						"Confidence": "Low"
+					}
+				]
+			},
+			{
+				"boundingBox": [ 536, 282, 619, 282, 617, 331, 535, 331 ],
+				"text": "120",
+				"words": [
+					{
+						"boundingBox": [ 535, 282, 613, 282, 613, 331, 535, 331 ],
+						"text": "120"
+					}
+				]
+			}
+		]
+	}
+}

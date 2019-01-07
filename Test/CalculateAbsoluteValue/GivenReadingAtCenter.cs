@@ -17,7 +17,7 @@ namespace Test.CalculateAbsoluteValue
 		[Fact]
 		public void ShouldReturnExactValue() {
 
-			var outValue = new VerticalNumberedFloatGuage().ProcessTextResult(_TraceWriter, new OilTankVision.Data.OilTankReading(), CreateTextResult(BoundingBox, TextDetected));
+			var outValue = new VerticalNumberedFloatGauge().ProcessTextResult(_TraceWriter, new OilTankVision.Data.OilTankReading(), CreateTextResult(BoundingBox, TextDetected));
 
 			Assert.Equal(150D, outValue.Value);
 

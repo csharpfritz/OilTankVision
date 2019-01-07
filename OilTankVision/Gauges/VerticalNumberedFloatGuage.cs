@@ -74,14 +74,15 @@ namespace OilTankVision.Gauges
 					var pctLocation = relativeTopOfDigit / (double)relativeBottom; 
 					var modifier = (0.5 - pctLocation) * 10;
 
-					_log.Info($"Found gauge value: {gaugeValue} at position {pctLocation:0%}");
-
 					outValue = gaugeValue + modifier;
+
+					_log.Info($"Found gauge value: {gaugeValue} at position {pctLocation:0%}, calculated as: {outValue:0.0}");
+
 				}
 
 			}
 
-			return outValue;
+			return Math.Round(outValue,1);
 
 		}
 	}

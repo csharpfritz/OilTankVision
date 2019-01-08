@@ -21,8 +21,9 @@ namespace OilTankVision.Gauges
 				ReadingDateTime = oilTankReading.ReadingDateTime,
 			};
 
-			var line = _rawData.recognitionResult.lines.FirstOrDefault(l => l.text == "SCULLY" && l.words.Any(w => w.Confidence != "Low")); 
+			var line = _rawData.recognitionResult.lines.FirstOrDefault(l => l.text == "SCULLY" && l.words.Any(w => w.Confidence != "Low"));
 			line = line ?? _rawData.recognitionResult.lines.FirstOrDefault(l => l.text == "SCULLY");
+			line = line ?? _rawData.recognitionResult.lines.FirstOrDefault(l => l.text.EndsWith("LLY"));
 			if (line != null)
 			{
 				var topOfGauge = CalculateGaugeWindowTop(line);
